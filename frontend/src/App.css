@@ -1,0 +1,2506 @@
+ @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+/* App.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --primary-color: #2a8c4a; /* اللون الجديد للهيدر */
+  --secondary-color: #4caf50;
+  --accent-color: #8bc34a;
+  --text-color: #333;
+  --light-bg: #dbf2db; /* اللون الجديد لخلفية الموقع */
+  --white: #ffffff;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  direction: rtl;
+  background-color: var(--light-bg);
+}
+.App {
+  min-height: 100vh;
+  background-color: var(--light-bg);
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+/* Header Styles - تم التحديث */
+.header {
+  background-color: var(--primary-color); /* اللون الجديد */
+  box-shadow: var(--box-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.header-logo-image {
+  transition: transform 0.3s ease;
+  
+ 
+}
+
+.header-logo-image:hover {
+  transform: scale(1.1);
+}
+
+.header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 20px;
+}
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: -5%; /* في rtl، margin-left: auto سيدفعها إلى أقصى اليمين */
+ 
+}
+
+.logo-section h1 {
+  color: var(--white);
+  font-size: 1.5rem;
+   
+}
+.nav-menu ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.nav-menu {
+  margin: 0 auto; /* لتوسيط القائمة */
+}
+.nav-menu a {
+  text-decoration: none;
+  color: var(--white);
+  font-weight: 500;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-menu a::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--white);
+  transition: width 0.3s ease;
+}
+.nav-menu a:hover::before {
+  width: 100%;
+}
+.nav-menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+.nav-menu a.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+.nav-menu a.active::before {
+  width: 100%;
+}
+.user-actions .login-btn {
+  background-color: transparent;
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  transition: all 0.3s;
+  border: 2px solid var(--white);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.user-actions .login-btn:hover {
+  background-color: var(--white);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--white);
+}
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 15px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+.user-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.user-icon {
+  font-size: 1.2rem;
+  color: var(--white);
+}
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+.user-name {
+  font-weight: 500;
+  color: var(--white);
+}
+.user-type {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+.logout-btn {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.logout-btn:hover {
+  background: var(--white);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+/* Main Content */
+.main-content {
+  min-height: calc(100vh - 140px);
+  background-color: var(--light-bg);
+}
+/* Page Container */
+.page-container {
+  padding: 2rem 0;
+  background-color: var(--light-bg);
+}
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.page-header h2 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+.page-header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+/* أنماط صفحة تسجيل الدخول */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3f6346 0%, #4caf50 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  direction: rtl;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 450px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInUp 0.6s ease-out;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* باقي أنماط Login تبقى كما هي مع تعديل الألوان لتتناسب */
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+  
+}
+
+
+.app-title h1 {
+  color: var(--primary-color);
+  font-size: 1.8rem;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.app-subtitle {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  margin: 5px 0 0 0;
+  font-weight: 500;
+}
+.welcome-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.welcome-section h2 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.welcome-section p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+.tabs-container {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 6px;
+  margin-bottom: 25px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.tab-btn.active {
+  background: var(--white);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(63, 99, 70, 0.3);
+}
+.tab-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--primary-color);
+}
+.user-type-section {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.user-type-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.user-types {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* تغيير من 3 إلى 2 */
+  gap: 12px;
+}
+
+.user-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 10px;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+  height: 100px;
+}
+
+.user-type-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.user-type-card.selected {
+  background: #f8fff8;
+  box-shadow: 0 8px 25px rgba(63, 99, 70, 0.2);
+  border-color: var(--primary-color);
+  animation: bounce 0.5s ease;
+}
+@keyframes bounce {
+  0%, 20%, 60%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  80% {
+    transform: translateY(-2px);
+  }
+}
+.type-icon {
+  font-size: 2.2rem;
+  margin-bottom: 5px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+  color: var(--primary-color);
+}
+.user-type-card:hover .type-icon {
+  transform: scale(1.1);
+}
+.user-type-card span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color);
+  position: relative;
+  z-index: 1;
+}
+.login-form {
+  margin-bottom: 20px;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.input-with-icon {
+  position: relative;
+}
+.input-with-icon .input-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+.input-with-icon input {
+  width: 100%;
+  padding: 16px 50px 16px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: var(--white);
+  font-family: inherit;
+}
+.input-with-icon input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(63, 99, 70, 0.1);
+  transform: translateY(-1px);
+}
+.input-with-icon input:focus + .input-icon {
+  color: var(--primary-color);
+}
+.password-toggle {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+.password-toggle:hover {
+  color: var(--primary-color);
+}
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.remember-me:hover {
+  color: var(--primary-color);
+}
+.remember-me input:checked {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.forgot-password {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+.forgot-password:hover {
+  text-decoration: underline;
+  color: #3f6346;
+}
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #4caf50 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(63, 99, 70, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(63, 99, 70, 0.4);
+}
+.auth-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+.auth-footer p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+.auth-footer span {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: all 0.3s ease;
+}
+.auth-footer span:hover {
+  color: #3f6346;
+}
+/* Footer Styles */
+.footer {
+  background: var(--primary-color);
+  color: white;
+  padding: 2rem 0 1rem;
+}
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.footer-section h3,
+.footer-section h4 {
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+}
+.footer-section ul {
+  list-style: none;
+}
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+.footer-section a {
+  color: #ddd;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.footer-section a:hover {
+  color: var(--accent-color);
+}
+.footer-bottom {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #555;
+  color: #aaa;
+}
+/* أنماط الصفحات الأخرى */
+.diagnosis-container,
+.analysis-container,
+.store-container,
+.consultation-container,
+.seasons-plants-container {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+/* Diagnosis & Analysis Pages */
+.diagnosis-container,
+.analysis-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.upload-section {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.upload-area {
+  margin-bottom: 1.5rem;
+}
+.upload-label {
+  display: block;
+  cursor: pointer;
+}
+.file-input {
+  display: none;
+}
+
+/* PlantsSeasons */
+
+.btnAll .btnSeason {
+    border-radius: 2rem !important;
+    transition: 0.3s ease-in-out;
+}
+
+/* Hover */
+.btnAll .btnSeason:hover {
+    background-color: #b2ecb2;
+    border: none;
+}
+
+/* Focus */
+.btnAll .btnSeason:focus {
+    background-color: #206d24;
+    color: white !important;
+    border: none;
+}
+
+.btnAll .btnSeason:focus small {
+    color: white !important;
+}
+.card{
+  border-radius: 40px !important;
+  overflow: hidden;
+  
+}
+.card:hover{
+transform: scale(1.04); 
+ transition: 0.4s ease;
+}
+.moreInfo{
+  background-color: #b2ecb2;
+  border-radius: 15px;
+}
+.modal-content .modalImg{
+    border-radius: 20px !important;
+   width: 90%;
+    overflow: hidden;  
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+/* فلتر المتجر */
+.shopFilterGroup .shopFilterBtn {
+    border-radius: 25px !important;
+    transition: all 0.3s ease;
+    border: 2px solid #d4edd4 !important;
+    padding: 10px 20px;
+}
+
+.shopFilterGroup .shopFilterBtn:hover {
+    background: #f0f9f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.1);
+}
+
+.shopFilterGroup .shopFilterBtn.active {
+    background: #2e7d32 !important;
+    color: #fff !important;
+    border-color: #2e7d32 !important;
+}
+
+/* كروت المتجر */
+.shopCard {
+    border-radius: 15px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0 !important;
+}
+
+.shopCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.shopCard img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.shopCardTitle {
+    font-weight: bold;
+    color: #333 !important;
+    margin-bottom: 8px;
+}
+
+.shopPrice {
+    color: #2e7d32;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* زر تفاصيل المنتج */
+.shopDetailsBtn {
+    background: #4caf50;
+    border-radius: 10px;
+    transition: all 0.3s;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.shopDetailsBtn:hover {
+    background: #388e3c;
+    transform: translateY(-2px);
+}
+
+/* ///////payModal///////// */
+#shopPaymentModal .modal-content {
+    border-radius: 15px !important;
+    overflow: hidden;
+}
+
+#shopPayBox {
+    background: #f1f8e9;
+    border-right: 3px solid #4caf50;
+}
+
+/* وسائل الدفع */
+.shopPayOption {
+    border: 2px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.shopPayOption:hover {
+    background: #f8fdf8;
+    border-color: #a5d6a7;
+}
+
+.shopPayOption.active {
+    border-color: #4caf50 !important;
+    background: #e8f5e9 !important;
+}
+
+/* زر إتمام الدفع */
+#shopConfirmPay {
+    background: #4caf50 !important;
+    border-radius: 10px;
+    transition: all 0.3s;
+    border: none;
+    padding: 10px;
+}
+
+#shopConfirmPay:hover {
+    background: #388e3c !important;
+}
+
+/* ستايل عربة التسوق */
+.cart-sidebar {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 15px;
+}
+
+.cart-header {
+    color: #2e7d32;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.cart-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-total {
+    font-weight: 700;
+    color: #2e7d32;
+    font-size: 1.1rem;
+    margin-top: 15px;
+}
+
+.checkout-btn {
+    background: #4caf50;
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+    border: none;
+    font-weight: 600;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.checkout-btn:hover {
+    background: #388e3c;
+}
+
+/* إزالة الحدود الخضراء من العناوين */
+.title-txt, .card-title, h3, h4, h5, h6 {
+    border: none !important;
+    text-decoration: none !important;
+}
+
+
+
+
+/* أنماط استشارة الخبراء */
+.consultation-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.experts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.expert-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.expert-card:hover {
+  transform: translateY(-5px);
+}
+.expert-image {
+  height: 200px;
+  overflow: hidden;
+}
+.expert-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.expert-info {
+  padding: 1.5rem;
+}
+.expert-info h4 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+.specialization {
+  font-weight: 500;
+  color: var(--secondary-color);
+  margin-bottom: 0.5rem;
+}
+.experience, .rating {
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+.description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+.expert-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-align: center;
+  padding: 0.5rem;
+  background: #f0f8f0;
+  border-radius: var(--border-radius);
+}
+.booking-steps {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  gap: 2rem;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.5;
+}
+.step.active {
+  opacity: 1;
+}
+.step span {
+  width: 40px;
+  height: 40px;
+  background: #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.step.active span {
+  background: var(--primary-color);
+  color: white;
+}
+.booking-details {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+.selected-expert,
+.time-selection,
+.payment-selection,
+.booking-summary {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+}
+.selected-expert:last-child,
+.time-selection:last-child,
+.payment-selection:last-child,
+.booking-summary:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.expert-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.expert-summary img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.change-expert-btn {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin-right: auto;
+}
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.time-slot {
+  padding: 1rem;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+.time-slot.selected {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+}
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.payment-method.selected {
+  border-color: var(--primary-color);
+  background: #f0f8f0;
+}
+.method-icon {
+  font-size: 1.5rem;
+}
+.method-name {
+  font-weight: 500;
+}
+.summary-details {
+  margin: 1rem 0;
+}
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+.summary-item.total {
+  border-top: 2px solid var(--primary-color);
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+.book-now-btn {
+  width: 100%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.book-now-btn:hover:not(:disabled) {
+  background: var(--secondary-color);
+}
+.book-now-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+/* أنماط جلسة المحادثة */
+.chat-session {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  background: #f9f9f9;
+}
+.expert-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.expert-info img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.end-chat-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+.chat-messages {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.message {
+  max-width: 70%;
+  padding: 1rem;
+  border-radius: 1rem;
+  position: relative;
+}
+.user-message {
+  align-self: flex-end;
+  background: var(--primary-color);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+.expert-message {
+  align-self: flex-start;
+  background: #f0f0f0;
+  border-bottom-left-radius: 0.25rem;
+}
+.message-time {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  display: block;
+  margin-top: 0.5rem;
+}
+.welcome-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  background: #f9f9f9;
+  border-radius: var(--border-radius);
+  margin: 2rem auto;
+  max-width: 500px;
+}
+.chat-input {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  gap: 1rem;
+}
+.chat-input input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+}
+.chat-input button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+
+
+/* أنماط رفع الصور المحسنة */
+.upload-section {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  text-align: center;
+  border: 2px dashed transparent;
+  transition: all 0.3s ease;
+}
+.upload-area {
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+.upload-area.dragging {
+  border-color: var(--primary-color);
+  background: rgba(63, 99, 70, 0.05);
+}
+.upload-label {
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.file-input {
+  display: none;
+}
+.upload-placeholder {
+  border: 3px dashed #e0e0e0;
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+.upload-area.dragging .upload-placeholder {
+  border-color: var(--primary-color);
+  background: rgba(63, 99, 70, 0.05);
+  transform: scale(1.02);
+}
+.upload-placeholder:hover {
+  border-color: var(--primary-color);
+  background: rgba(63, 99, 70, 0.03);
+}
+.upload-icon {
+  font-size: 4rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+.upload-placeholder:hover .upload-icon {
+  opacity: 1;
+  transform: translateY(-5px);
+}
+.upload-placeholder h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.upload-placeholder p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+.upload-features {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.upload-features span {
+  color: #888;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border-radius: 20px;
+}
+/* معاينة الصورة */
+.image-preview {
+  position: relative;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+.image-preview img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+}
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.image-preview:hover .image-overlay {
+  opacity: 1;
+}
+.change-image-btn {
+  background: var(--white);
+  color: var(--primary-color);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.change-image-btn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+/* أزرار التحليل والتشخيص */
+.diagnose-btn,
+.analyze-btn {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #4caf50 100%);
+  color: white;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(63, 99, 70, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+  min-width: 200px;
+}
+.diagnose-btn:hover:not(:disabled),
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(63, 99, 70, 0.4);
+}
+.diagnose-btn:disabled,
+.analyze-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.diagnose-btn.loading,
+.analyze-btn.loading {
+  background: linear-gradient(135deg, #666 0%, #888 100%);
+}
+.spinner {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* قسم النتائج */
+.result-section {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  animation: slideUp 0.5s ease-out;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+.success-icon {
+  font-size: 2rem;
+  color: #4CAF50;
+}
+.result-header h3 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 1.5rem;
+}
+/* كارت التشخيص */
+.diagnosis-card {
+  border: 2px solid #f0f0f0;
+  border-radius: 15px;
+  padding: 2rem;
+  background: #fafafa;
+}
+.disease-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+.disease-header h4 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 1.3rem;
+}
+.disease-badge {
+  background: #4CAF50;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.info-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+.info-item {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid var(--primary-color);
+}
+.info-item h5 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.info-item p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+.steps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.steps li:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+.step-number {
+  background: var(--primary-color);
+  color: white;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+/* كارت تحليل التربة */
+.soil-type-banner {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #4caf50 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.recommendation-card {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid var(--primary-color);
+}
+.recommendation-card h5 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.plants-list,
+.fertilizers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.plant-item,
+.fertilizer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.8rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.plant-item:hover,
+.fertilizer-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+.plant-bullet,
+.fertilizer-bullet {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+.notes p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 1rem;
+}
+/* أنماط صفحة النباتات والفصول */
+.plants-seasons-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+/* شريط البحث */
+.search-section {
+  margin-bottom: 2rem;
+}
+.search-box {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.search-input {
+  width: 100%;
+  padding: 15px 50px 15px 50px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(63, 99, 70, 0.1);
+}
+.search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+.filter-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+/* قسم الفصول */
+.seasons-section {
+  margin-bottom: 2rem;
+}
+.seasons-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+}
+.seasons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.season-card {
+  background: var(--white);
+  border: 3px solid #e0e0e0;
+  border-radius: 15px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.season-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+.season-card.active {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+  box-shadow: 0 8px 25px rgba(63, 99, 70, 0.15);
+}
+.season-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+.season-card.active .season-icon {
+  transform: scale(1.1);
+}
+.season-info h4 {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+.season-months {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+.season-indicator {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+.active-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(63, 99, 70, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(63, 99, 70, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(63, 99, 70, 0);
+  }
+}
+/* قسم الإحصائيات */
+.stats-section {
+  margin-bottom: 2rem;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+.stat-card {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid var(--primary-color);
+}
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+/* قسم النباتات */
+.plants-section h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.plants-count {
+  color: #666;
+  font-size: 1rem;
+  font-weight: normal;
+}
+.plants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.plant-card {
+  background: var(--white);
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+.plant-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+.plant-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+.plant-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.plant-card:hover .plant-image img {
+  transform: scale(1.1);
+}
+.plant-seasons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.season-tag {
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.plant-info {
+  padding: 1.5rem;
+}
+.plant-info h4 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+.plant-period {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.plant-cost {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.plant-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.feature {
+  background: #f0f7f0;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+/* حالة عدم وجود نباتات */
+.no-plants {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+.no-plants-icon {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+}
+.no-plants p {
+  color: #666;
+  font-size: 1.1rem;
+}
+/* نافذة التفاصيل */
+.plant-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal-content {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.close-modal {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.close-modal:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+.modal-header {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: flex-start;
+}
+.plant-image-large {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+.plant-image-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.plant-header-info {
+  flex: 1;
+}
+.plant-header-info h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+.plant-seasons-large {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.season-tag-large {
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.plant-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.detail-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.detail-item h5 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-item p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+.cost-highlight {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+.water-needs-section {
+  background: #f0f7f0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border-right: 4px solid var(--primary-color);
+}
+.water-needs-section h5 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+.water-needs-section p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+.add-to-favorites {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #4caf50 100%);
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(63, 99, 70, 0.3);
+}
+.add-to-favorites:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(63, 99, 70, 0.4);
+}
+/* تصغير صندوق تسجيل الدخول */
+.login-container-proper {
+  max-width: 380px !important; /* كان 480px */
+  padding: 2rem 1.5rem !important; /* كان 2.5rem */
+  margin: 1rem auto !important;
+}
+/* تصغير الهيدر */
+.login-container-proper .app-title h1 {
+  font-size: 1.5rem !important; /* كان 1.8rem */
+}
+.login-container-proper .title-icon {
+  font-size: 2.2rem !important; /* كان 2.8rem */
+}
+.login-container-proper .app-subtitle {
+  font-size: 0.95rem !important; /* كان 1.1rem */
+}
+/* تصغير التبويبات */
+.login-container-proper .tabs-container {
+  margin-bottom: 1.5rem !important;
+}
+.login-container-proper .tab-btn {
+  padding: 0.8rem 1rem !important; /* كان 1rem 1.2rem */
+  font-size: 0.9rem !important;
+  min-height: 44px !important; /* كان 48px */
+}
+/* تصغير أنواع المستخدمين */
+.login-container-proper .user-types {
+  gap: 0.6rem !important;
+}
+.login-container-proper .user-type-card {
+  padding: 1rem 0.6rem !important; /* كان 1.2rem 0.8rem */
+  min-height: 80px !important; /* كان 90px */
+}
+.login-container-proper .type-icon {
+  font-size: 1.5rem !important; /* كان 1.8rem */
+}
+.login-container-proper .user-type-card span {
+  font-size: 0.8rem !important; /* كان 0.9rem */
+}
+/* تصغير الحقول */
+.login-container-proper .input-with-icon input {
+  padding: 0.9rem 2.8rem 0.9rem 2.8rem !important; /* كان 1rem 3.2rem */
+  min-height: 48px !important; /* كان 52px */
+  font-size: 0.9rem !important;
+}
+/* تصغير زر الإرسال */
+.login-container-proper .submit-btn-proper {
+  padding: 1rem !important; /* كان 1.1rem */
+  min-height: 30px !important; /* كان 52px */
+  font-size: 1rem !important;
+  border-radius: 25px;
+  max-width: 290px;
+  transition: 0.5s ease, transform 0.3s ease
+}
+.login-container-proper .submit-btn-proper:hover {
+  background: #7fb68a;
+  transform: translateY(-2px);
+  transform: scale(1.05);
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header .container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .nav-menu ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+ 
+  .seasons-filter {
+    flex-wrap: wrap;
+  }
+ 
+  .plants-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  .store-container {
+    grid-template-columns: 1fr;
+  }
+ 
+  .store-sidebar {
+    position: static;
+  }
+ 
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+ 
+  .experts-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .booking-steps {
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .expert-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+ 
+  .change-expert-btn {
+    margin-right: 0;
+    margin-top: 1rem;
+  }
+ 
+  .message {
+    max-width: 90%;
+  }
+  .user-types-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .social-buttons {
+    flex-direction: column;
+  }
+ 
+  .form-options {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .user-badge {
+    flex-direction: column;
+    text-align: center;
+    gap: 5px;
+  }
+ 
+  .user-details {
+    align-items: center;
+  }
+ 
+  .nav-menu a {
+    font-size: 0.9rem;
+  }
+  .login-container {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  .app-title {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .app-title h1 {
+    font-size: 1.5rem;
+  }
+  .user-types {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .user-type-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 15px;
+  }
+  .type-icon {
+    margin-bottom: 0;
+    margin-left: 10px;
+  }
+  .form-options {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  .upload-section {
+    padding: 1.5rem;
+  }
+ 
+  .upload-placeholder {
+    padding: 3rem 1rem;
+  }
+ 
+  .upload-icon {
+    font-size: 3rem;
+  }
+ 
+  .upload-features {
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .image-preview {
+    max-width: 100%;
+  }
+ 
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .disease-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+ 
+  .info-grid {
+    gap: 1rem;
+  }
+ 
+  .diagnose-btn,
+  .analyze-btn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+  .seasons-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+ 
+  .plants-grid {
+    grid-template-columns: 1fr;
+  }
+ 
+  .modal-content {
+    padding: 1.5rem;
+    margin: 10px;
+  }
+ 
+  .modal-header {
+    flex-direction: column;
+    text-align: center;
+  }
+ 
+  .plant-image-large {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+ 
+  .plant-details-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+ 
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .search-box {
+    max-width: 100%;
+  }
+}
+/* تأثيرات إضافية للتفاعل */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.login-container {
+  animation: fadeIn 0.6s ease-out;
+}
+/* تأثيرات عند التحديد */
+.user-type-card.selected {
+  animation: pulse 0.6s ease-in-out;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* تحسين المظهر العام */
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background: #f8f9fa;
+}
+/* تأثيرات Hover للـ Header */
+.nav-menu a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.nav-menu a::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4CAF50;
+  transition: width 0.3s ease;
+}
+.nav-menu a:hover::before {
+  width: 100%;
+}
+.nav-menu a:hover {
+  background: rgba(76, 175, 80, 0.1);
+  transform: translateY(-2px);
+}
+.nav-menu a.active {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4CAF50;
+}
+.nav-menu a.active::before {
+  width: 100%;
+}
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 15px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+.user-badge:hover {
+  background: rgba(76, 175, 80, 0.1);
+}
+.logout-btn, .login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+.logout-btn:hover {
+  background: #ff4444;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+}
+.login-btn:hover {
+  background: #4CAF50;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+/* شريط التمرير المخصص */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #3f6346;
+}
+
+
+/* التعديل الاخير  */
+/* SoilAnalysis.css */
+.soil-selection-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #2d5016;
+}
+
+.soil-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.soil-type-label {
+  display: block;
+  cursor: pointer;
+}
+
+.soil-radio {
+  display: none;
+}
+
+.soil-type-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  background: white;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  height: 100%;
+}
+
+.soil-type-card:hover {
+  border-color: #4CAF50;
+}
+
+.soil-radio:checked + .soil-type-card {
+  border-color: #4CAF50;
+  background-color: #f8fff8;
+}
+
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.soil-radio:checked + .soil-type-card .radio-circle {
+  border-color: #4CAF50;
+  background-color: #4CAF50;
+}
+
+.soil-radio:checked + .soil-type-card .radio-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.soil-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.soil-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.analysis-actions {
+  text-align: center;
+}
+
+.analyze-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.analyze-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.analyze-btn.loading {
+  background: #45a049;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Results Section */
+.result-section {
+  margin-top: 2rem;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #4CAF50;
+}
+
+.soil-result-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.soil-type-banner {
+  background: #4CAF50;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.soil-type-banner h4 {
+  margin: 0;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.recommendation-card {
+  background: #f8fff8;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.recommendation-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.recommendation-card h5 {
+  margin: 0 0 1rem 0;
+  color: #2d5016;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #555;
+}
+
+.list-item span {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.recommendation-card p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .soil-types-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
