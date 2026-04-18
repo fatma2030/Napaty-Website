@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { FaCloudUploadAlt, FaImage, FaSpinner, FaCheckCircle } from "react-icons/fa";
 import api from "../api/api"; 
+import "../style/DiseaseDiagnosis.css";
 
-const DiseaseDiagnosis = () => {
-  const [selectedFile, setSelectedFile] = useState(null);     // ✅ ملف الصورة للرفع
-  const [selectedImage, setSelectedImage] = useState(null);   // ✅ preview base64
-  const [result, setResult] = useState(null);                 // { success, message, status, data }
+
+const DiseaseDiagnosis = ({ language = "ar" }) => {
+  const isArabic = language === "ar";
+
+  const [selectedFile, setSelectedFile] = useState(null);    
+  const [selectedImage, setSelectedImage] = useState(null);  
+  const [result, setResult] = useState(null);                 
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -13,13 +17,23 @@ const DiseaseDiagnosis = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      setResult({ success: false, message: "من فضلك اختار صورة فقط (JPG/PNG/WEBP)" });
+      setResult({
+        success: false,
+        message: isArabic
+          ? "من فضلك اختار صورة فقط (JPG/PNG/WEBP)"
+          : "Please select an image only (JPG/PNG/WEBP)"
+      });
       return;
     }
 
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      setResult({ success: false, message: "حجم الصورة أكبر من 10MB" });
+      setResult({
+        success: false,
+        message: isArabic
+          ? "حجم الصورة أكبر من 10MB"
+          : "Image size is larger than 10MB"
+      });
       return;
     }
 
@@ -75,19 +89,25 @@ const DiseaseDiagnosis = () => {
 
       setResult({
         success: true,
-        message: "تم رفع الصورة بنجاح",
+        message: isArabic ? "تم رفع الصورة بنجاح" : "Image uploaded successfully",
         data: res.data,
       });
     } catch (err) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
 
-      let message = "حصل خطأ أثناء رفع الصورة";
+      let message = isArabic
+        ? "حصل خطأ أثناء رفع الصورة"
+        : "An error occurred while uploading the image";
 
       if (status === 401) {
-        message = "عليك تسجّل الدخول أولاً لتتمكن من رفع الصورة";
+        message = isArabic
+          ? "عليك تسجّل الدخول أولاً لتتمكن من رفع الصورة"
+          : "You need to log in first to upload the image";
       } else if (status === 403) {
-        message = "ليس لديك صلاحية لرفع الصورة";
+        message = isArabic
+          ? "ليس لديك صلاحية لرفع الصورة"
+          : "You do not have permission to upload the image";
       } else if (detail) {
         message = detail;
       }
@@ -107,8 +127,12 @@ const DiseaseDiagnosis = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>تشخيص أمراض النبات</h2>
-        <p>قم برفع صورة للنبات المصاب للحصول على تشخيص دقيق وعلاج مناسب</p>
+        <h2>{isArabic ? "تشخيص أمراض النبات" : "Plant Disease Diagnosis"}</h2>
+        <p>
+          {isArabic
+            ? "قم برفع صورة للنبات المصاب للحصول على تشخيص دقيق وعلاج مناسب"
+            : "Upload an image of the infected plant to get an accurate diagnosis and suitable treatment"}
+        </p>
       </div>
 
       <div className="diagnosis-container">
@@ -121,7 +145,10 @@ const DiseaseDiagnosis = () => {
           >
             {selectedImage ? (
               <div className="image-preview">
-                <img src={selectedImage} alt="النبات المصاب" />
+                <img
+                  src={selectedImage}
+                  alt={isArabic ? "النبات المصاب" : "Infected Plant"}
+                />
                 <div className="image-overlay">
                   <button
                     type="button"
@@ -129,7 +156,7 @@ const DiseaseDiagnosis = () => {
                     onClick={resetImage}
                     disabled={isLoading}
                   >
-                    <FaImage /> تغيير الصورة
+                    <FaImage /> {isArabic ? "تغيير الصورة" : "Change Image"}
                   </button>
                 </div>
               </div>
@@ -146,11 +173,19 @@ const DiseaseDiagnosis = () => {
                   <div className="upload-icon">
                     <FaCloudUploadAlt />
                   </div>
-                  <h3>رفع صورة النبات</h3>
-                  <p>اسحب وأفلت الصورة هنا أو انقر للاختيار</p>
+                  <h3>{isArabic ? "رفع صورة النبات" : "Upload Plant Image"}</h3>
+                  <p>
+                    {isArabic
+                      ? "اسحب وأفلت الصورة هنا أو انقر للاختيار"
+                      : "Drag and drop the image here or click to choose"}
+                  </p>
                   <div className="upload-features">
-                    <span>يدعم: JPG, PNG, WEBP</span>
-                    <span>الحد الأقصى: 10MB</span>
+                    <span>
+                      {isArabic ? "يدعم: JPG, PNG, WEBP" : "Supports: JPG, PNG, WEBP"}
+                    </span>
+                    <span>
+                      {isArabic ? "الحد الأقصى: 10MB" : "Maximum size: 10MB"}
+                    </span>
                   </div>
                 </div>
               </label>
@@ -167,12 +202,12 @@ const DiseaseDiagnosis = () => {
               {isLoading ? (
                 <>
                   <FaSpinner className="spinner" />
-                  جاري الرفع...
+                  {isArabic ? "جاري الرفع..." : "Uploading..."}
                 </>
               ) : (
                 <>
                   <FaCheckCircle />
-                     تشخيص المرض
+                  {isArabic ? "تشخيص المرض" : "Diagnose Disease"}
                 </>
               )}
             </button>
@@ -183,16 +218,17 @@ const DiseaseDiagnosis = () => {
           <div className="result-section">
             <div className="result-header">
               <FaCheckCircle className="success-icon" />
-              <h3>{result.success ? "تمت العملية" : "حصل خطأ"}</h3>
+              <h3>{result.success
+                ? (isArabic ? "تمت العملية" : "Process Completed")
+                : (isArabic ? "حصل خطأ" : "An Error Occurred")}</h3>
             </div>
 
             <div className="diagnosis-card">
               <p><b>{result.message}</b></p>
-              {/*result.status && <p>Status: {result.status}</p>*/}
 
               {uploadedImagePath && (
                 <div style={{ marginTop: 12 }}>
-                  <p><b>Uploaded Image:</b></p>
+                  <p><b>{isArabic ? "الصورة المرفوعة:" : "Uploaded Image:"}</b></p>
                   <img
                     src={`http://127.0.0.1:8000${uploadedImagePath}`}
                     alt="Uploaded"
