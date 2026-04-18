@@ -1,13 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   createConsultationRequest,
   fetchExpertRequests,
   fetchExperts,
-  fetchMyRequests,         
+  fetchMyRequests,
   updateRequestStatus,
+  cancelConsultationRequest,
 } from "../api/consultation";
+
+import {
+  useConsultationNotifications,
+  useChatNotifications,
+} from "../hooks/useConsultationNotifications";
+
+import "../style/Consultation.css";
 
 const timeSlots = [
   "9:00 ص - 10:00 ص",
@@ -18,17 +26,11 @@ const timeSlots = [
   "3:00 م - 4:00 م",
 ];
 
-const paymentMethods = [
-  { id: "vodafone", name: "فودافون كاش", icon: "📱" },
-  { id: "visa", name: "فيزا / ماستركارد", icon: "💳" },
-  { id: "paypal", name: "باي بال", icon: "🔵" },
-];
-
-const formatDateTime = (value) => {
+const formatDateTime = (value, language = "ar") => {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("ar-EG", {
+  return d.toLocaleString(language === "ar" ? "ar-EG" : "en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -37,66 +39,60 @@ const formatDateTime = (value) => {
   });
 };
 
-const getRequestTime = (req) => {
+const getRequestTime = (req) =>
+  req.created_at ||
+  req.createdAt ||
+  req.timestamp ||
+  req.sent_at ||
+  req.time ||
+  req.created ||
+  null;
+
+const ChatBadge = ({ count }) => {
+  if (!count || count <= 0) return null;
   return (
-    req.created_at ||
-    req.createdAt ||
-    req.timestamp ||
-    req.sent_at ||
-    req.time ||
-    req.created ||
-    null
+    <span className="chat-notification-badge" aria-label={`${count} رسالة جديدة`}>
+      {count > 99 ? "99+" : count}
+    </span>
   );
 };
 
-const ChatButton = ({ onClick, disabled }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    style={{
-      marginTop: 12,
-      padding: "10px 14px",
-      borderRadius: 14,
-      border: "none",
-      cursor: disabled ? "not-allowed" : "pointer",
-      fontWeight: 800,
-      color: "#fff",
-      background: disabled
-        ? "#9CA3AF"
-        : "linear-gradient(135deg, #0ea5e9, #2563eb)",
-      boxShadow: disabled ? "none" : "0 12px 24px rgba(37,99,235,0.18)",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 8,
-      transition: "transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease",
-      opacity: disabled ? 0.75 : 1,
-    }}
-    onMouseEnter={(e) => {
-      if (disabled) return;
-      e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.boxShadow = "0 16px 30px rgba(37,99,235,0.24)";
-    }}
-    onMouseLeave={(e) => {
-      if (disabled) return;
-      e.currentTarget.style.transform = "translateY(0px)";
-      e.currentTarget.style.boxShadow = "0 12px 24px rgba(37,99,235,0.18)";
-    }}
-  >
-    💬 فتح الشات
-  </button>
-);
+const ChatButton = ({ onClick, disabled, language = "ar", unreadCount = 0 }) => {
+  const isArabic = language === "ar";
+  return (
+    <button onClick={onClick} disabled={disabled} className="btn-chat">
+      <span className="btn-chat-inner">
+        💬 {isArabic ? "فتح الشات" : "Open Chat"}
+        <ChatBadge count={unreadCount} />
+      </span>
+    </button>
+  );
+};
 
-function Consultation() {
+function Consultation({ language = "ar" }) {
+  const isArabic = language === "ar";
   const navigate = useNavigate();
 
   const token = useMemo(
     () => localStorage.getItem("access") || localStorage.getItem("token"),
     []
   );
+
   const userType = useMemo(
     () => (localStorage.getItem("user_type") || "user").toString().toLowerCase(),
     []
   );
+
+  const hiddenRequestsStorageKey = useMemo(
+    () => `hidden_consultation_requests_${userType}`,
+    [userType]
+  );
+
+  const { markAllAsSeen } = useConsultationNotifications(userType);
+
+  useEffect(() => {
+    if (token) markAllAsSeen();
+  }, [token, markAllAsSeen]);
 
   const [experts, setExperts] = useState([]);
   const [expertsLoading, setExpertsLoading] = useState(false);
@@ -104,27 +100,108 @@ function Consultation() {
 
   const [selectedExpert, setSelectedExpert] = useState(null);
   const [consultationTime, setConsultationTime] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
   const [message, setMessage] = useState("");
   const [creating, setCreating] = useState(false);
 
   const [myReqs, setMyReqs] = useState([]);
   const [myReqLoading, setMyReqLoading] = useState(false);
   const [myReqError, setMyReqError] = useState("");
+  const [cancellingId, setCancellingId] = useState(null);
 
   const [requests, setRequests] = useState([]);
   const [reqLoading, setReqLoading] = useState(false);
   const [reqError, setReqError] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [showMessageBox, setShowMessageBox] = useState(false);
+  const [messageBoxType, setMessageBoxType] = useState("success");
+  const [messageBoxTitle, setMessageBoxTitle] = useState("");
+  const [messageBoxText, setMessageBoxText] = useState("");
+  const [messageBoxAction, setMessageBoxAction] = useState(null);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState(null);
+
+  const acceptedRequests = useMemo(() => {
+    if (userType === "expert") {
+      return requests.filter((r) => r.status === "accepted");
+    }
+    return myReqs.filter((r) => r.status === "accepted");
+  }, [userType, requests, myReqs]);
+
+  const { chatUnread, markChatAsSeen } = useChatNotifications(acceptedRequests);
+
+  // ─────────────────────────────────────────
+  const getHiddenRequests = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(hiddenRequestsStorageKey);
+      const parsed = JSON.parse(raw || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [hiddenRequestsStorageKey]);
+
+  const saveHiddenRequest = useCallback(
+    (id) => {
+      const current = getHiddenRequests();
+      if (!current.includes(id)) {
+        localStorage.setItem(
+          hiddenRequestsStorageKey,
+          JSON.stringify([...current, id])
+        );
+      }
+    },
+    [getHiddenRequests, hiddenRequestsStorageKey]
+  );
+
+  const openMessageBox = (type, title, text, action = null) => {
+    setMessageBoxType(type);
+    setMessageBoxTitle(title);
+    setMessageBoxText(text);
+    setMessageBoxAction(() => action);
+    setShowMessageBox(true);
+  };
+
+  const closeMessageBox = () => {
+    setShowMessageBox(false);
+    setMessageBoxAction(null);
+  };
+
+  const openDeleteConfirm = (req, source) => {
+    setRequestToDelete({ ...req, source });
+    setShowDeleteConfirm(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    setShowDeleteConfirm(false);
+    setRequestToDelete(null);
+  };
+
+  const handleDeleteRequest = useCallback(() => {
+    if (!requestToDelete) return;
+    const { id, source } = requestToDelete;
+
+    if (source === "user") {
+      setMyReqs((prev) => prev.filter((r) => r.id !== id));
+    } else {
+      setRequests((prev) => prev.filter((r) => r.id !== id));
+    }
+
+    saveHiddenRequest(id);
+    closeDeleteConfirm();
+
+    openMessageBox(
+      "success",
+      isArabic ? "تم حذف المحادثة بنجاح" : "The chat was removed successfully"
+    );
+  }, [requestToDelete, saveHiddenRequest, isArabic]);
 
   useEffect(() => {
     if (!token) navigate("/login", { replace: true });
   }, [token, navigate]);
 
   useEffect(() => {
-    if (!token) return;
-    if (userType !== "user") return;
-
+    if (!token || userType !== "user") return;
     (async () => {
       try {
         setExpertsLoading(true);
@@ -132,300 +209,494 @@ function Consultation() {
         const data = await fetchExperts();
         setExperts(Array.isArray(data) ? data : data?.results || []);
       } catch (e) {
-        setExpertsError("حصل خطأ في تحميل الخبراء");
+        setExpertsError(
+          isArabic ? "حصل خطأ في تحميل الخبراء" : "Error loading experts"
+        );
         console.error(e);
       } finally {
         setExpertsLoading(false);
       }
     })();
-  }, [token, userType]);
+  }, [token, userType, isArabic]);
 
-  const loadMyRequests = async () => {
+  const loadMyRequests = useCallback(async () => {
     try {
       setMyReqLoading(true);
       setMyReqError("");
       const data = await fetchMyRequests();
       const arr = Array.isArray(data) ? data : data?.results || [];
-      setMyReqs(arr);
+      const hiddenIds = getHiddenRequests();
+      setMyReqs(arr.filter((item) => !hiddenIds.includes(item.id)));
     } catch (e) {
-      setMyReqError("حصل خطأ في تحميل طلباتك");
+      setMyReqError(
+        isArabic ? "حصل خطأ في تحميل طلباتك" : "Error loading your requests"
+      );
       console.error(e);
     } finally {
       setMyReqLoading(false);
     }
-  };
+  }, [getHiddenRequests, isArabic]);
 
   useEffect(() => {
-    if (!token) return;
-    if (userType !== "user") return;
-
+    if (!token || userType !== "user") return;
     loadMyRequests();
-
     const t = setInterval(() => {
       if (document.hidden) return;
       loadMyRequests();
     }, 10000);
-
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, userType]);
+  }, [token, userType, loadMyRequests]);
 
   useEffect(() => {
-    if (!token) return;
-    if (userType !== "expert") return;
-
+    if (!token || userType !== "expert") return;
     (async () => {
       try {
         setReqLoading(true);
         setReqError("");
         const data = await fetchExpertRequests();
-        setRequests(Array.isArray(data) ? data : data?.results || []);
+        const arr = Array.isArray(data) ? data : data?.results || [];
+        const hiddenIds = getHiddenRequests();
+        setRequests(arr.filter((item) => !hiddenIds.includes(item.id)));
       } catch (e) {
-        setReqError("حصل خطأ في تحميل الطلبات");
+        setReqError(
+          isArabic ? "حصل خطأ في تحميل الطلبات" : "Error loading requests"
+        );
         console.error(e);
       } finally {
         setReqLoading(false);
       }
     })();
-  }, [token, userType]);
+  }, [token, userType, isArabic, getHiddenRequests]);
 
   if (!token) return null;
 
-  // ====== USER: create request ======
+  const handleOpenChat = async (requestId) => {
+    await markChatAsSeen(requestId);
+    navigate(`/chat/${requestId}`);
+  };
+
   const handleCreateRequest = async () => {
-    if (!selectedExpert || !consultationTime || !paymentMethod) {
-      alert("يرجى اختيار خبير + وقت + طريقة دفع");
+    if (!selectedExpert || !consultationTime) {
+      openMessageBox(
+        "warning",
+        isArabic ? "بيانات ناقصة" : "Missing Information",
+        isArabic
+          ? "يرجى اختيار خبير وميعاد الجلسة"
+          : "Please choose an expert and session time"
+      );
       return;
     }
 
     try {
       setCreating(true);
-
       await createConsultationRequest({
         expert_id: selectedExpert.id,
         time_slot: consultationTime,
-        payment_method: paymentMethod,
         message: message || "",
       });
 
-      alert("تم إرسال طلب الاستشارة ✅");
+      openMessageBox(
+        "success",
+        isArabic
+          ? "تم إرسال طلب الاستشارة بنجاح"
+          : "Consultation request sent successfully"
+      );
+
       setSelectedExpert(null);
       setConsultationTime("");
-      setPaymentMethod("");
       setMessage("");
-
-      loadMyRequests();
+      await loadMyRequests();
     } catch (e) {
-      alert("حصل خطأ أثناء إرسال الطلب");
+      openMessageBox(
+        "error",
+        isArabic
+          ? "حصل خطأ أثناء إرسال الطلب"
+          : "An error occurred while sending the request"
+      );
       console.error(e);
     } finally {
       setCreating(false);
     }
   };
 
-  // ====== EXPERT: accept/reject ======
+  const handleCancelRequest = async (id) => {
+    try {
+      setCancellingId(id);
+      await cancelConsultationRequest(id);
+      setMyReqs((prev) => prev.filter((r) => r.id !== id));
+      openMessageBox(
+        "success",
+        isArabic
+          ? "تم إلغاء الطلب بنجاح"
+          : "The request was cancelled successfully"
+      );
+    } catch (e) {
+      openMessageBox(
+        "error",
+        isArabic
+          ? "حصل خطأ أثناء إلغاء الطلب"
+          : "An error occurred while cancelling the request"
+      );
+      console.error(e);
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   const handleUpdateStatus = async (id, status) => {
     try {
       setUpdatingId(id);
       await updateRequestStatus(id, status);
       setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r))
+        prev.map((r) =>
+          r.id === id
+            ? {
+                ...r,
+                status:
+                  status === "accept"
+                    ? "accepted"
+                    : status === "reject"
+                    ? "rejected"
+                    : status,
+              }
+            : r
+        )
+      );
+      openMessageBox(
+        "success",
+        status === "accept" || status === "accepted"
+          ? isArabic
+            ? "تم قبول الطلب بنجاح"
+            : "The request has been accepted successfully"
+          : isArabic
+          ? "تم رفض الطلب بنجاح"
+          : "The request has been rejected successfully"
       );
     } catch (e) {
-      alert("حصل خطأ أثناء تحديث الحالة");
+      openMessageBox(
+        "error",
+        isArabic
+          ? "حصل خطأ أثناء تحديث الحالة"
+          : "An error occurred while updating the status"
+      );
       console.error(e);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // EXPERT VIEW
+  const MessageBox = () => {
+    if (!showMessageBox) return null;
+
+    const icon =
+      messageBoxType === "success"
+        ? "fas fa-check-circle"
+        : messageBoxType === "warning"
+        ? "fas fa-exclamation-triangle"
+        : "fas fa-times-circle";
+
+    const mainColor =
+      messageBoxType === "success"
+        ? "#198754"
+        : messageBoxType === "warning"
+        ? "#f59e0b"
+        : "#dc2626";
+
+    return (
+      <div className="consultation-overlay">
+        <div className="consultation-message-box">
+          <div className={`consultation-message-icon ${messageBoxType}`}>
+            <i className={icon}></i>
+          </div>
+          <h3 className="consultation-message-title" style={{ color: mainColor }}>
+            {messageBoxTitle}
+          </h3>
+          <p className="consultation-message-text">{messageBoxText}</p>
+          <button
+            onClick={() => {
+              closeMessageBox();
+              if (typeof messageBoxAction === "function") messageBoxAction();
+            }}
+            className="consultation-primary-btn"
+            style={{ background: mainColor, boxShadow: `0 12px 24px ${mainColor}33` }}
+          >
+            {isArabic ? "حسناً" : "OK"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+
+  const DeleteConfirmModal = () => {
+    if (!showDeleteConfirm) return null;
+    return (
+      <div className="consultation-overlay">
+        <div className="consultation-message-box">
+          <div className="consultation-message-icon error">
+            <i className="fas fa-trash-alt"></i>
+          </div>
+          <h3 className="consultation-message-title" style={{ color: "#dc2626" }}>
+            {isArabic ? "تأكيد الحذف" : "Confirm Delete"}
+          </h3>
+          <p className="consultation-message-text">
+            {isArabic
+              ? "هل أنت متأكد أنك تريد حذف هذه المحادثة"
+              : "Are you sure you want to remove this chat?"}
+          </p>
+          <div className="delete-modal-buttons">
+            <button
+              onClick={handleDeleteRequest}
+              className="consultation-primary-btn"
+              style={{ background: "#dc2626", boxShadow: "0 12px 24px rgba(220,38,38,0.22)" }}
+            >
+              {isArabic ? "نعم، احذف" : "Yes, Delete"}
+            </button>
+            <button onClick={closeDeleteConfirm} className="consultation-secondary-btn">
+              {isArabic ? "إلغاء" : "Cancel"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const DeleteButton = ({ onClick }) => (
+    <button onClick={onClick} className="btn-delete-chat">
+      🗑️ {isArabic ? "حذف الشات" : "Delete Chat"}
+    </button>
+  );
+
+  const CancelButton = ({ onClick, disabled }) => (
+    <button onClick={onClick} disabled={disabled} className="btn-cancel-request">
+      {disabled
+        ? isArabic ? "جاري الإلغاء..." : "Cancelling..."
+        : isArabic ? "إلغاء الطلب" : "Cancel Request"}
+    </button>
+  );
+
+
   if (userType === "expert") {
     return (
       <div className="page-container">
         <div className="page-header">
-          <h2>طلبات الاستشارات</h2>
+          <h2>{isArabic ? "طلبات الاستشارات" : "Consultation Requests"}</h2>
         </div>
 
         <div className="consultation-container">
-          {reqLoading && <p>جاري تحميل الطلبات...</p>}
+          {reqLoading && (
+            <p>{isArabic ? "جاري تحميل الطلبات..." : "Loading requests..."}</p>
+          )}
           {reqError && <p style={{ color: "red" }}>{reqError}</p>}
 
           {!reqLoading && !reqError && requests.length === 0 && (
-            <p>لا توجد طلبات حالياً</p>
+            <p>{isArabic ? "لا توجد طلبات حالياً" : "No requests at the moment"}</p>
           )}
 
           {!reqLoading &&
             !reqError &&
             requests.map((req) => {
-              const reqTime = formatDateTime(getRequestTime(req));
+              const reqTime = formatDateTime(getRequestTime(req), language);
               const userName =
-                req.user_name || req.user?.full_name || req.user?.username || "مستخدم";
+                req.user_name ||
+                req.user?.full_name ||
+                req.user?.username ||
+                (isArabic ? "مستخدم" : "User");
               const timeSlot = req.time_slot || "-";
+              const unread = chatUnread[req.id] || 0;
 
               return (
-                <div
-                  key={req.id}
-                  style={{
-                    marginBottom: 12,
-                    border: "1px solid #eee",
-                    borderRadius: 18,
-                    padding: 16,
-                    background: "#fff",
-                    boxShadow: "0 10px 24px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <h4 style={{ marginTop: 0 }}>طلب من: {userName}</h4>
+                <div key={req.id} className="consultation-request-card">
+                  <h4>
+                    {isArabic ? "طلب من:" : "Request from:"} {userName}
+                  </h4>
 
-                  <p style={{ margin: "8px 0" }}>
-                    <b>وقت الجلسة:</b> {timeSlot}
+                  <p>
+                    <b>{isArabic ? "وقت الجلسة:" : "Session Time:"}</b> {timeSlot}
                   </p>
 
-                  {reqTime ? (
-                    <p style={{ margin: "8px 0", opacity: 0.85 }}>
-                      <b>وقت الإرسال:</b> {reqTime}
+                  {reqTime && (
+                    <p className="muted">
+                      <b>{isArabic ? "وقت الإرسال:" : "Sent At:"}</b> {reqTime}
                     </p>
-                  ) : null}
+                  )}
 
-                  {req.message ? (
-                    <p style={{ margin: "8px 0" }}>
-                      <b>الرسالة:</b> {req.message}
+                  {req.message && (
+                    <p>
+                      <b>{isArabic ? "الرسالة:" : "Message:"}</b> {req.message}
                     </p>
-                  ) : null}
+                  )}
 
-                  {req.status === "pending" ? (
-                    <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                  {req.status === "pending" && (
+                    <div className="action-buttons">
                       <button
                         disabled={updatingId === req.id}
                         onClick={() => handleUpdateStatus(req.id, "accept")}
-                        style={{
-                          padding: "10px 14px",
-                          borderRadius: 12,
-                          border: "none",
-                          cursor: "pointer",
-                          fontWeight: 800,
-                          color: "#fff",
-                          background: "linear-gradient(135deg, #16a34a, #22c55e)",
-                          boxShadow: "0 10px 18px rgba(34,197,94,0.22)",
-                        }}
+                        className="btn-accept"
                       >
-                        {updatingId === req.id ? "..." : "قبول"}
+                        {updatingId === req.id ? "..." : isArabic ? "قبول" : "Accept"}
                       </button>
-
                       <button
                         disabled={updatingId === req.id}
                         onClick={() => handleUpdateStatus(req.id, "reject")}
-                        style={{
-                          padding: "10px 14px",
-                          borderRadius: 12,
-                          border: "none",
-                          cursor: "pointer",
-                          fontWeight: 800,
-                          color: "#fff",
-                          background: "linear-gradient(135deg, #dc2626, #ef4444)",
-                          boxShadow: "0 10px 18px rgba(239,68,68,0.22)",
-                        }}
+                        className="btn-reject"
                       >
-                        {updatingId === req.id ? "..." : "رفض"}
+                        {updatingId === req.id ? "..." : isArabic ? "رفض" : "Reject"}
                       </button>
+                      <DeleteButton onClick={() => openDeleteConfirm(req, "expert")} />
                     </div>
-                  ) : null}
+                  )}
 
-                  {/* ✅ فتح الشات للخبير بعد القبول */}
-                  {req.status === "accepted" ? (
-                    <ChatButton onClick={() => navigate(`/chat/${req.id}`)} />
-                  ) : null}
+                  {req.status === "accepted" && (
+                    <div className="action-buttons">
+                      <ChatButton
+                        language={language}
+                        unreadCount={unread}
+                        onClick={() => handleOpenChat(req.id)}
+                      />
+                      <DeleteButton onClick={() => openDeleteConfirm(req, "expert")} />
+                    </div>
+                  )}
+
+                  {req.status !== "pending" && req.status !== "accepted" && (
+                    <div className="action-buttons">
+                      <p className="faded">
+                        {isArabic
+                          ? "تم إنهاء هذا الطلب"
+                          : "This request has been processed"}
+                      </p>
+                      <DeleteButton onClick={() => openDeleteConfirm(req, "expert")} />
+                    </div>
+                  )}
                 </div>
               );
             })}
         </div>
+
+        <MessageBox />
+        <DeleteConfirmModal />
       </div>
     );
   }
 
-  // USER VIEW
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>استشارة مع خبير</h2>
-        <p>اختر خبير وابعته طلب مراسلة/حجز</p>
+        <h2>{isArabic ? "استشارة مع خبير" : "Consultation with an Expert"}</h2>
+        <p>
+          {isArabic
+            ? "اختر خبير وحدد ميعاد الجلسة ثم انتظر موافقة الخبير"
+            : "Choose an expert, select the session time, then wait for the expert's approval"}
+        </p>
       </div>
 
       <div className="consultation-container">
-        <div
-          style={{
-            marginBottom: 16,
-            border: "1px solid #eee",
-            borderRadius: 18,
-            padding: 16,
-            background: "#fff",
-            boxShadow: "0 10px 24px rgba(0,0,0,0.06)",
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>طلباتك</h3>
-          {myReqLoading && <p>جاري تحميل طلباتك...</p>}
+
+        <div className="my-requests-card">
+          <h3>{isArabic ? "طلباتك" : "Your Requests"}</h3>
+
+          {myReqLoading && (
+            <p>{isArabic ? "جاري تحميل طلباتك..." : "Loading your requests..."}</p>
+          )}
           {myReqError && <p style={{ color: "red" }}>{myReqError}</p>}
 
           {!myReqLoading && !myReqError && myReqs.length === 0 ? (
-            <p style={{ opacity: 0.75 }}>مفيش طلبات لحد دلوقتي</p>
+            <p className="faded">
+              {isArabic ? "مفيش طلبات لحد دلوقتي" : "No requests yet"}
+            </p>
           ) : (
             myReqs.map((req) => {
-              const reqTime = formatDateTime(getRequestTime(req));
+              const reqTime = formatDateTime(getRequestTime(req), language);
               const expertName =
                 req.expert_name ||
                 req.expert?.full_name ||
                 req.expert?.username ||
-                "خبير";
+                (isArabic ? "خبير" : "Expert");
+              const unread = chatUnread[req.id] || 0;
+
               return (
-                <div
-                  key={req.id}
-                  style={{
-                    borderTop: "1px solid #f1f1f1",
-                    paddingTop: 12,
-                    marginTop: 12,
-                  }}
-                >
-                  <p style={{ margin: "6px 0" }}>
-                    <b>الخبير:</b> {expertName}
+                <div key={req.id} className="request-item">
+                  <p>
+                    <b>{isArabic ? "الخبير:" : "Expert:"}</b> {expertName}
                   </p>
 
-                  {reqTime ? (
-                    <p style={{ margin: "6px 0", opacity: 0.85 }}>
-                      <b>وقت الإرسال:</b> {reqTime}
-                    </p>
-                  ) : null}
-
-                  {req.status === "accepted" ? (
-                    <ChatButton onClick={() => navigate(`/chat/${req.id}`)} />
-                  ) : (
-                    <p style={{ margin: "6px 0", opacity: 0.75 }}>
-                      الطلب لم يُقبل بعد
+                  {req.time_slot && (
+                    <p>
+                      <b>{isArabic ? "ميعاد الجلسة:" : "Session Time:"}</b>{" "}
+                      {req.time_slot}
                     </p>
                   )}
+
+                  {reqTime && (
+                    <p className="muted">
+                      <b>{isArabic ? "وقت الإرسال:" : "Sent At:"}</b> {reqTime}
+                    </p>
+                  )}
+
+                  <div className="action-buttons">
+                    {req.status === "accepted" ? (
+                      <>
+                        <ChatButton
+                          language={language}
+                          unreadCount={unread}
+                          onClick={() => handleOpenChat(req.id)}
+                        />
+                        <DeleteButton onClick={() => openDeleteConfirm(req, "user")} />
+                      </>
+                    ) : req.status === "pending" ? (
+                      <>
+                        <p className="faded">
+                          {isArabic
+                            ? "بانتظار موافقة الخبير"
+                            : "Waiting for the expert's approval"}
+                        </p>
+                        <CancelButton
+                          onClick={() => handleCancelRequest(req.id)}
+                          disabled={cancellingId === req.id}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="faded">
+                          {isArabic ? "تم رفض الطلب" : "The request was rejected"}
+                        </p>
+                        <DeleteButton onClick={() => openDeleteConfirm(req, "user")} />
+                      </>
+                    )}
+                  </div>
                 </div>
               );
             })
           )}
         </div>
 
-        {expertsLoading && <p>جاري تحميل الخبراء...</p>}
+        {/* ── تحميل الخبراء ── */}
+        {expertsLoading && (
+          <p>{isArabic ? "جاري تحميل الخبراء..." : "Loading experts..."}</p>
+        )}
         {expertsError && <p style={{ color: "red" }}>{expertsError}</p>}
 
+        {/* ── قائمة الخبراء ── */}
         {!expertsLoading && !expertsError && !selectedExpert && (
           <div className="experts-selection">
-            <h3>الخبراء المتاحون</h3>
+            <h3>{isArabic ? "الخبراء المتاحون" : "Available Experts"}</h3>
             <div className="experts-grid">
               {experts.map((expert) => (
                 <div
                   key={expert.id}
                   className="expert-card"
                   onClick={() => setSelectedExpert(expert)}
-                  style={{ cursor: "pointer" }}
                 >
                   <div className="expert-info">
                     <h4>{expert.full_name || expert.name}</h4>
-                    <p>{expert.specialization || "خبير زراعي"}</p>
-                    <p>خبرة: {expert.experience_years ?? expert.experience ?? "-"}</p>
+                    <p>
+                      {expert.specialization ||
+                        (isArabic ? "خبير زراعي" : "Agricultural Expert")}
+                    </p>
+                    <p>
+                      {isArabic ? "خبرة:" : "Experience:"}{" "}
+                      {expert.experience_years ?? expert.experience ?? "-"}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -433,12 +704,16 @@ function Consultation() {
           </div>
         )}
 
+        {/* ── نموذج الحجز ── */}
         {!expertsLoading && !expertsError && selectedExpert && (
           <div className="booking-process">
-            <h4>الخبير المختار: {selectedExpert.full_name || selectedExpert.name}</h4>
+            <h4>
+              {isArabic ? "الخبير المختار:" : "Selected Expert:"}{" "}
+              {selectedExpert.full_name || selectedExpert.name}
+            </h4>
 
             <div className="time-selection">
-              <h4>اختر وقت الجلسة</h4>
+              <h4>{isArabic ? "اختر وقت الجلسة" : "Choose Session Time"}</h4>
               <div className="time-slots">
                 {timeSlots.map((slot, index) => (
                   <button
@@ -453,45 +728,50 @@ function Consultation() {
               </div>
             </div>
 
-            <div className="payment-selection">
-              <h4>طريقة الدفع</h4>
-              <div className="payment-methods">
-                {paymentMethods.map((method) => (
-                  <div
-                    key={method.id}
-                    className={`payment-method ${
-                      paymentMethod === method.id ? "selected" : ""
-                    }`}
-                    onClick={() => setPaymentMethod(method.id)}
-                    style={{ cursor: creating ? "not-allowed" : "pointer" }}
-                  >
-                    <span>{method.icon}</span> <span>{method.name}</span>
-                  </div>
-                ))}
-              </div>
+            <div style={{ marginTop: 14 }}>
+              <h4>{isArabic ? "رسالة إضافية" : "Additional Message"}</h4>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={
+                  isArabic
+                    ? "اكتب رسالة أو تفاصيل إضافية للخبير..."
+                    : "Write a message or extra details for the expert..."
+                }
+                disabled={creating}
+                className="consultation-textarea"
+              />
             </div>
-
-            
 
             <button
               onClick={handleCreateRequest}
-              disabled={creating || !consultationTime || !paymentMethod}
+              disabled={creating || !consultationTime}
               className="book-now-btn"
               style={{ marginTop: 14 }}
             >
-              {creating ? "جاري إرسال الطلب..." : "إرسال طلب الاستشارة"}
+              {creating
+                ? isArabic ? "جاري إرسال الطلب..." : "Sending request..."
+                : isArabic ? "إرسال طلب الاستشارة" : "Send Consultation Request"}
             </button>
 
-            <button
-              style={{ marginTop: 10 }}
-              onClick={() => setSelectedExpert(null)}
-              disabled={creating}
-            >
-              رجوع
-            </button>
+          
+  <button
+    className="back-btn"
+    onClick={() => {
+      setSelectedExpert(null);
+      setConsultationTime("");
+      setMessage("");
+    }}
+    disabled={creating}
+  >
+    {isArabic ? "رجوع" : "Back"}
+  </button>
           </div>
         )}
       </div>
+
+      <MessageBox />
+      <DeleteConfirmModal />
     </div>
   );
 }
