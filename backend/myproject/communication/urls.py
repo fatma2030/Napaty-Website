@@ -6,7 +6,9 @@ from .views import (
     request_messages,
     expert_consultation_requests,
     update_request_status,
+    cancel_consultation_request,
 )
+
 urlpatterns = [
     path("api/communication/experts/", experts_list),
     path("api/communication/requests/", my_consultation_requests),
@@ -14,4 +16,5 @@ urlpatterns = [
     path("api/communication/requests/<int:request_id>/messages/", request_messages),
     path("api/communication/expert/requests/", expert_consultation_requests),
     path("api/communication/requests/<int:request_id>/status/", update_request_status),
+    path("api/communication/requests/<int:request_id>/cancel/", cancel_consultation_request),
 ]
