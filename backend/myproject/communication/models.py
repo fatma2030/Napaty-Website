@@ -7,6 +7,7 @@ class ConsultationRequest(models.Model):
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
         ("closed", "Closed"),
+        ("cancelled", "Cancelled"),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="consultation_requests")
