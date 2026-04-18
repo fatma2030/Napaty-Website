@@ -1,17 +1,37 @@
-// pages/SoilAnalysis.js
 import React, { useState } from 'react';
 import { FaSeedling, FaCheckCircle, FaLeaf } from 'react-icons/fa';
+import "../style/SoilAnalysis.css";
 
-const SoilAnalysis = () => {
+
+const SoilAnalysis = ({ language = 'ar' }) => {
+  const isArabic = language === 'ar';
+
   const [selectedSoilType, setSelectedSoilType] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+
   const soilTypes = [
-    { id: 'sandy', name: 'تربة رملية', description: 'حبيبات كبيرة، تصريف مائي سريع' },
-    { id: 'clay', name: 'تربة طينية', description: 'حبيبات دقيقة، تحتفظ بالماء' },
-    { id: 'loamy', name: 'تربة طميية', description: 'مزيج متوازن، أفضل للزراعة' },
-    { id: 'silty', name: 'تربة سلتية', description: 'حبيبات متوسطة، خصبة' }
+    {
+      id: 'sandy',
+      name: isArabic ? 'تربة رملية' : 'Sandy Soil',
+      description: isArabic ? 'حبيبات كبيرة، تصريف مائي سريع' : 'Large particles, fast drainage'
+    },
+    {
+      id: 'clay',
+      name: isArabic ? 'تربة طينية' : 'Clay Soil',
+      description: isArabic ? 'حبيبات دقيقة، تحتفظ بالماء' : 'Fine particles, retains water'
+    },
+    {
+      id: 'loamy',
+      name: isArabic ? 'تربة طميية' : 'Loamy Soil',
+      description: isArabic ? 'مزيج متوازن، أفضل للزراعة' : 'Balanced mix, best for farming'
+    },
+    {
+      id: 'silty',
+      name: isArabic ? 'تربة سلتية' : 'Silty Soil',
+      description: isArabic ? 'حبيبات متوسطة، خصبة' : 'Medium particles, fertile'
+    }
   ];
 
   const handleSoilTypeChange = (soilId) => {
@@ -19,17 +39,17 @@ const SoilAnalysis = () => {
   };
 
   const handleAnalysis = async (e) => {
-    if (e) e.preventDefault(); //  أهم سطر: يمنع المتصفح من إرسال GET لبورت 3000
+    if (e) e.preventDefault();
 
     if (!selectedSoilType) {
-      alert('يرجى اختيار نوع التربة');
+      alert(isArabic ? 'يرجى اختيار نوع التربة' : 'Please select a soil type');
       return;
     }
 
     setIsLoading(true);
 
     try {
-const response = await fetch('http://127.0.0.1:8000/api/soil/analyze/', {
+      const response = await fetch('http://127.0.0.1:8000/api/soil/analyze/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,21 +59,24 @@ const response = await fetch('http://127.0.0.1:8000/api/soil/analyze/', {
         }),
       });
 
-     if (response.status === 401) {
-  alert('لازم تخلي ال API AllowAny في Django');
-  return;
-}
+      if (response.status === 401) {
+        alert(
+          isArabic
+            ? 'لازم تخلي ال API AllowAny في Django'
+            : 'You need to make the API AllowAny in Django'
+        );
+        return;
+      }
 
-if (!response.ok) {
-  throw new Error('Server error');
-}
-
+      if (!response.ok) {
+        throw new Error('Server error');
+      }
 
       const data = await response.json();
       console.log("API Response:", data);
 
       setAnalysisResult({
-        soilType: data.soil_type || data.soilType || 'غير معروف',
+        soilType: data.soil_type || data.soilType || (isArabic ? 'غير معروف' : 'Unknown'),
         plants: Array.isArray(data.plants)
           ? data.plants
           : typeof data.plants === 'string'
@@ -68,7 +91,11 @@ if (!response.ok) {
 
     } catch (error) {
       console.error(error);
-      alert('حصل خطأ في الاتصال بالسيرفر. تأكد أن Django يعمل على بورت 8000');
+      alert(
+        isArabic
+          ? 'حصل خطأ في الاتصال بالسيرفر. تأكد أن Django يعمل على بورت 8000'
+          : 'A server connection error occurred. Make sure Django is running on port 8000'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -77,14 +104,22 @@ if (!response.ok) {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>تحليل التربة وتوصية المحاصيل</h2>
-        <p>اختر نوع التربة للحصول على توصيات الزراعة المناسبة</p>
+        <h2>
+          {isArabic
+            ? 'تحليل التربة وتوصية المحاصيل'
+            : 'Soil Analysis and Crop Recommendation'}
+        </h2>
+        <p>
+          {isArabic
+            ? 'اختر نوع التربة للحصول على توصيات الزراعة المناسبة'
+            : 'Choose soil type to get suitable farming recommendations'}
+        </p>
       </div>
 
       <div className="analysis-container">
         <div className="soil-selection-section">
           <h3 className="section-title">
-            <FaSeedling /> اختر نوع التربة
+            <FaSeedling /> {isArabic ? 'اختر نوع التربة' : 'Choose Soil Type'}
           </h3>
 
           <div className="soil-types-grid">
@@ -110,20 +145,20 @@ if (!response.ok) {
 
           <div className="analysis-actions">
             <button
-              type="button" 
-              onClick={(e) => handleAnalysis(e)} 
+              type="button"
+              onClick={(e) => handleAnalysis(e)}
               disabled={!selectedSoilType || isLoading}
               className={`analyze-btn ${isLoading ? 'loading' : ''}`}
             >
               {isLoading ? (
                 <>
                   <span className="spinner"></span>
-                  جاري التحليل...
+                  {isArabic ? 'جاري التحليل...' : 'Analyzing...'}
                 </>
               ) : (
                 <>
                   <FaCheckCircle />
-                  المحاصيل والأسمدة المناسبة
+                  {isArabic ? 'المحاصيل والأسمدة المناسبة' : 'Suitable Crops and Fertilizers'}
                 </>
               )}
             </button>
@@ -134,17 +169,19 @@ if (!response.ok) {
           <div className="result-section">
             <div className="result-header">
               <FaCheckCircle className="success-icon" />
-              <h3>نتائج التحليل</h3>
+              <h3>{isArabic ? 'نتائج التحليل' : 'Analysis Results'}</h3>
             </div>
 
             <div className="soil-result-card">
               <div className="soil-type-banner">
-                <h4>نوع التربة: {analysisResult.soilType}</h4>
+                <h4>
+                  {isArabic ? 'نوع التربة:' : 'Soil Type:'} {analysisResult.soilType}
+                </h4>
               </div>
 
               <div className="recommendations-grid">
                 <div className="recommendation-card">
-                  <h5><FaLeaf /> المحاصيل المناسبة</h5>
+                  <h5><FaLeaf /> {isArabic ? 'المحاصيل المناسبة' : 'Suitable Crops'}</h5>
                   <div className="list">
                     {analysisResult.plants.length > 0 ? (
                       analysisResult.plants.map((plant, idx) => (
@@ -153,13 +190,13 @@ if (!response.ok) {
                         </div>
                       ))
                     ) : (
-                      <p>لا توجد بيانات</p>
+                      <p>{isArabic ? 'لا توجد بيانات' : 'No data available'}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="recommendation-card">
-                  <h5>الأسمدة المناسبة</h5>
+                  <h5>{isArabic ? 'الأسمدة المناسبة' : 'Suitable Fertilizers'}</h5>
                   <div className="list">
                     {analysisResult.fertilizers.length > 0 ? (
                       analysisResult.fertilizers.map((fertilizer, idx) => (
@@ -168,7 +205,7 @@ if (!response.ok) {
                         </div>
                       ))
                     ) : (
-                      <p>لا توجد بيانات</p>
+                      <p>{isArabic ? 'لا توجد بيانات' : 'No data available'}</p>
                     )}
                   </div>
                 </div>
