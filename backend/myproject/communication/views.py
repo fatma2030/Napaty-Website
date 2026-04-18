@@ -15,8 +15,6 @@ from .serializers import (
 )
 
 
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def update_request_status(request, request_id):
@@ -35,9 +33,7 @@ def update_request_status(request, request_id):
 
     action = request.data.get("action", "").strip().lower()  # accept / reject / close
 
-
     if action in ["accept", "reject"]:
-        # مينفعش accept/reject غير لو pending
         if req_obj.status != "pending":
             return Response(
                 {"detail": f"Cannot '{action}' when status is '{req_obj.status}'"},
@@ -47,11 +43,12 @@ def update_request_status(request, request_id):
         req_obj.status = "accepted" if action == "accept" else "rejected"
         req_obj.save()
 
-        return Response({"message": "updated", "id": req_obj.id, "status": req_obj.status},
-                        status=status.HTTP_200_OK)
+        return Response(
+            {"message": "updated", "id": req_obj.id, "status": req_obj.status},
+            status=status.HTTP_200_OK
+        )
 
     if action == "close":
-        # close مسموح فقط لو accepted 
         if req_obj.status != "accepted":
             return Response(
                 {"detail": f"Cannot 'close' when status is '{req_obj.status}'"},
@@ -61,11 +58,45 @@ def update_request_status(request, request_id):
         req_obj.status = "closed"
         req_obj.save()
 
-        return Response({"message": "updated", "id": req_obj.id, "status": req_obj.status},
-                        status=status.HTTP_200_OK)
+        return Response(
+            {"message": "updated", "id": req_obj.id, "status": req_obj.status},
+            status=status.HTTP_200_OK
+        )
 
-    return Response({"detail": "Invalid action. Use: accept | reject | close"},
-                    status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        {"detail": "Invalid action. Use: accept | reject | close"},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(["POST", "PATCH"])
+@permission_classes([IsAuthenticated])
+def cancel_consultation_request(request, request_id):
+    try:
+        req_obj = ConsultationRequest.objects.get(id=request_id)
+    except ConsultationRequest.DoesNotExist:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # لازم الطلب يكون تبع اليوزر نفسه
+    if req_obj.user != request.user:
+        return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+
+    # الإلغاء مسموح فقط لو الطلب لسه pending
+    if req_obj.status != "pending":
+        return Response(
+            {"detail": f"Cannot cancel when status is '{req_obj.status}'"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    req_obj.status = "cancelled"
+    req_obj.save()
+
+    return Response(
+        {"message": "cancelled", "id": req_obj.id, "status": req_obj.status},
+        status=status.HTTP_200_OK
+    )
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def experts_list(request):
@@ -85,18 +116,25 @@ def create_consultation_request(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def my_consultation_requests(request):
-    qs = ConsultationRequest.objects.filter(user=request.user).select_related("expert", "expert__profile").order_by("-id")
+    qs = ConsultationRequest.objects.filter(
+        user=request.user
+    ).exclude(
+        status="cancelled"
+    ).select_related("expert", "expert__profile").order_by("-id")
+
     return Response(ConsultationRequestListSerializer(qs, many=True).data)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def expert_consultation_requests(request):
-    # لازم يكون Expert
     if not hasattr(request.user, "profile") or request.user.profile.user_type != "expert":
         return Response({"detail": "Forbidden"}, status=403)
 
     qs = ConsultationRequest.objects.filter(
         expert=request.user
+    ).exclude(
+        status="cancelled"
     ).select_related("user", "user__profile").order_by("-id")
 
     return Response(ConsultationRequestListForExpertSerializer(qs, many=True).data)
@@ -125,4 +163,4 @@ def request_messages(request, request_id):
         sender=request.user,
         text=serializer.validated_data["text"],
     )
-    return Response(MessageSerializer(msg).data, status=201)       
+    return Response(MessageSerializer(msg).data, status=201)
