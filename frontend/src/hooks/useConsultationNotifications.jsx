@@ -1,5 +1,4 @@
 
-// src/hooks/useConsultationNotifications.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   fetchMyRequests,
@@ -7,9 +6,7 @@ import {
   fetchRequestMessages,
 } from "../api/consultation";
 
-// ─────────────────────────────────────────────
-// helpers — localStorage
-// ─────────────────────────────────────────────
+
 function getSeenIds(key) {
   try {
     const parsed = JSON.parse(localStorage.getItem(key) || "[]");
@@ -23,7 +20,6 @@ function saveSeenIds(key, ids) {
   try {
     localStorage.setItem(key, JSON.stringify([...ids]));
   } catch {
-    /* ignore */
   }
 }
 
@@ -40,13 +36,10 @@ function saveLastMsgCount(requestId, count) {
   try {
     localStorage.setItem(`chat_msg_count_${requestId}`, String(count));
   } catch {
-    /* ignore */
   }
 }
 
-// ─────────────────────────────────────────────
-// 1. Hook — badge الهيدر (طلبات جديدة)
-// ─────────────────────────────────────────────
+
 export function useConsultationNotifications(userType) {
   const [badgeCount, setBadgeCount] = useState(0);
   const seenKey = `seen_requests_${userType}`;
@@ -112,18 +105,14 @@ export function useConsultationNotifications(userType) {
       saveSeenIds(seenKey, seen);
       setBadgeCount(0);
     } catch {
-      /* ignore */
+      
     }
   }, [userType, seenKey]);
 
   return { badgeCount, markAllAsSeen, refresh: computeBadge };
 }
 
-// ─────────────────────────────────────────────
-// 2. Hook — badge كل شات على حدة
-//    المدخل: acceptedRequests = [{id, ...}, ...]
-//    المخرج: { chatUnread: {[reqId]: number}, markChatAsSeen(reqId) }
-// ─────────────────────────────────────────────
+
 export function useChatNotifications(acceptedRequests) {
   const [chatUnread, setChatUnread] = useState({});
   const pollingRef = useRef(null);
@@ -146,7 +135,6 @@ export function useChatNotifications(acceptedRequests) {
           const last = getLastMsgCount(req.id);
 
           if (last === null) {
-            // أول مرة → نسجّل العدد الحالي كـ baseline ولا نظهر badge
             saveLastMsgCount(req.id, total);
             updates[req.id] = 0;
           } else {
@@ -173,7 +161,6 @@ export function useChatNotifications(acceptedRequests) {
     return () => clearInterval(pollingRef.current);
   }, [acceptedRequests, computeUnread]);
 
-  // يُستدعى لما يفتح الشات → يصفّر badge الشات ده بس
   const markChatAsSeen = useCallback(async (requestId) => {
     try {
       const token =
@@ -186,7 +173,6 @@ export function useChatNotifications(acceptedRequests) {
 
       setChatUnread((prev) => ({ ...prev, [requestId]: 0 }));
     } catch {
-      /* ignore */
     }
   }, []);
 
