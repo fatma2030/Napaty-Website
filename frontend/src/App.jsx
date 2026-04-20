@@ -1,4 +1,3 @@
-// App.js
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
@@ -46,22 +45,18 @@ function App() {
 
         <main className="main-content">
           <Routes>
-            {/* الصفحة الرئيسية */}
             <Route path="/" element={<Welcome />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/chat/:requestId" element={<ProtectedRoute user={user}><Chat /> </ProtectedRoute>}/>
 
 
-            {/* تسجيل الدخول */}
             <Route path="/login" element={<LoginRegister setUser={setUser} />} />
 
-            {/* صفحات عامة (Guest عادي) */}
             <Route path="/diagnosis" element={<DiseaseDiagnosis />} />
             <Route path="/soil-analysis" element={<SoilAnalysis />} />
             <Route path="/plants-seasons" element={<PlantsSeasons />} />
             <Route path="/store" element={<Store />} />
 
-            {/* ✅ صفحة الاستشارة محمية */}
             <Route
               path="/consultation"
               element={
@@ -71,7 +66,6 @@ function App() {
               }
             />
 
-            {/* ✅ صفحة التواصل (Redirect للباك) محمية */}
             <Route
               path="/communication"
               element={
@@ -81,7 +75,6 @@ function App() {
               }
             />
 
-            {/* أي Route غلط */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
